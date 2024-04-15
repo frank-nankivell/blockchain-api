@@ -1,0 +1,48 @@
+{
+  "name": "eoshackathon",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "cy:open": "cypress open",
+    "test": "cypress run",
+    "lint": "eslint ./routes && prettier --check \"routes/**/*.js\"",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@sendgrid/mail": "^7.6.1",
+    "aws-sdk": "^2.393.0",
+    "axios": "^0.18.1",
+    "body-parser": "^1.18.3",
+    "cognito-express": "^2.0.14",
+    "cors": "^2.8.4",
+    "cypress": "^10.1.0",
+    "easy-zip": "0.0.4",
+    "eosjs": "^22.1.0",
+    "express": "^4.16.3",
+    "express-jwt-middleware": "^1.0.3",
+    "jsonwebtoken": "^8.5.0",
+    "jwk-to-pem": "^2.0.1",
+    "jwt-decode": "^2.2.0",
+    "lodash": "^4.17.21",
+    "mime": "^2.3.1",
+    "njwt": "^0.4.0",
+    "node-fetch": "^2.3.0",
+    "path": "^0.12.7",
+    "redis": "^3.0.2",
+    "serverless-dynamodb-local": "^0.2.40",
+    "serverless-offline": "^8.3.1",
+    "sha256": "^0.2.0",
+    "shelljs": "^0.8.2",
+    "uniqid": "^5.0.3"
+  },
+  "devDependencies": {
+    "eslint": "^7.18.0",
+    "jest": "^27.5.1",
+    "prettier": "^2.2.1",
+    "serverless-prune-plugin": "^2.0.1",
+    "sinon": "^13.0.1"
+  }
+}

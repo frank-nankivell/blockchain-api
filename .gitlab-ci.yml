@@ -1,0 +1,56 @@
+image: amaysim/serverless:3.23.0
+stages:
+  - deploy
+  - test
+variables:
+  AWS_DEFAULT_REGION: eu-west-3
+
+deploy_dev:
+  before_script:
+    - yarn
+    - aws ssm get-parameter --region $AWS_DEFAULT_REGION --name "/blockchain/.env" --with-decryption | jq -r .Parameter.Value > .env
+  stage: deploy
+  script:
+    - serverless deploy --stage dev
+  environment: dev
+  only:
+    - develop
+
+deploy_stage:
+  before_script:
+    - yarn
+    - aws ssm get-parameter --region $AWS_DEFAULT_REGION --name "/blockchain/.env" --with-decryption | jq -r .Parameter.Value > .env
+    - aws ssm get-parameter --region $AWS_DEFAULT_REGION --name "/blockchain/cypress/stage/.env" --with-decryption | jq -r .Parameter.Value > cypress.env.json
+  stage: deploy
+  script:
+    - serverless deploy --stage stage
+  environment: staging
+  artifacts:
+    paths:
+      - cypress.env.json
+    expire_in: 1 day
+  only:
+    - staging
+
+test_stage:
+  stage: test
+  image: cypress/base:12
+  before_script:
+    - yarn add cypress -g
+    - cat cypress.env.json
+    - echo "env is $ENV - running a e2e testing"
+  script:
+    - yarn run test
+  only:
+    - staging
+
+deploy_prod:
+  before_script:
+    - yarn
+    - aws ssm get-parameter --region $AWS_DEFAULT_REGION --name "/blockchain/.env" --with-decryption | jq -r .Parameter.Value > .env
+  stage: deploy
+  script:
+    - serverless deploy --stage prod --verbose
+  environment: production
+  only:
+    - main

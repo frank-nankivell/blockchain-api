@@ -1,0 +1,117 @@
+
+service: blockchain-api
+org: b-api
+useDotenv: true
+plugins:
+  - serverless-offline
+  - serverless-prune-plugin
+frameworkVersion: "3"
+package:
+  exclude:
+    - public/***
+    - blockchain/***
+    - cypress/***
+    - dynamo/***
+    - redis/***
+    - routes/***
+    - node_modules/shelljs
+    - node_modules/cypress
+    - node_modules/express
+    - node_modules/express-jwt-middleware
+    - node_modules/jwt-to-pem
+    - node_modules/jwt-decode
+    - node_modules/redis
+    - node_modulex/sha256
+provider:
+  name: aws
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action: 	
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+          Resource: "*" 
+        - Effect: "Allow"
+          Action: "ssm:GetParameters"
+          Resource: "*"
+  region: eu-west-3
+  runtime: nodejs14.x
+  stage: ${opt:stage,'dev'}
+  versionFunctions: false
+  apiGateway:
+    apiKeys:
+      - blockchain-${opt:stage,self:provider.stage}
+  environment:
+    ENVIRONMENT: ${self:provider.stage}
+    EMAIL_NOTIFICATION: ${env:EMAIL_NOTIFICATION}
+    EMAIL_TOPUP_FAIL: ${env:EMAIL_TOPUP_FAIL}
+    EOS_API_URL: ${env:EOS_API_URL}
+    CONTRACT_SYMBOL: ${env:CONTRACT_SYMBOL}
+    MAIN_ACCOUNT: ${env:MAIN_ACCOUNT}
+    BLOCKCHAIN_PASS: ${env:ROUTE_PASSWORD}
+    PUBLIC_KEY: ${env:PUBLIC_KEY}
+    SENDGRID_API_KEY: ${env:SEND_GRID_KEY}
+    DEFAULT_AWS_REGION: ${self:provider.region}
+    USER_TABLE: user
+    SURVEY_RESPONSE_TABLE: user_response
+    TOKEN_ENTRYS_TABLE: token_entrys
+
+custom:
+  prune:
+    automatic: true
+    number: 3
+  apiRoot: v2
+  stage: ${opt:stage, self:provider.stage}
+  EOS_API_MAPPER:
+    dev: https://api.testnet.eos.io
+    stage: https://api.testnet.eos.io
+    prod: https://mainnet.telos.net  
+
+functions:
+  hello:
+    handler: handler.hello
+  buyRam:
+    handler: lambda/handlers/buyRam.handler
+    timeout: 10
+    events:
+      - http:
+          path: ${self:custom.apiRoot}/buyRam
+          method: post
+          cors: true
+          private: true
+  newUser:
+    handler: lambda/handlers/newUser.handler
+    events:
+      - http:
+          path: ${self:custom.apiRoot}/newUser
+          method: post
+          cors: true
+          #private: true
+  currencyBalance:
+    handler: lambda/handlers/currencyBalance.handler
+    events:
+      - http:
+          path: ${self:custom.apiRoot}/getCurrencyBalance
+          method: post
+          cors: true
+          #private: true
+  transferToken:
+    handler: lambda/handlers/transferToken.handler
+    events:
+      - http:
+          path: ${self:custom.apiRoot}/transferToken
+          method: post
+          cors: true
+         # private: true
+  contractActivity:
+      handler: lambda/handlers/getContractActivity.handler
+      events:
+        - http:
+            path: ${self:custom.apiRoot}/getContractActivity
+            method: post
+            cors: true
